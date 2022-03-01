@@ -2,16 +2,18 @@ use std::io::Read;
 use std::sync::mpsc::Sender;
 use std::thread;
 
+use crate::FirstMessage;
+
 pub struct FileReader<T> {
     file: Option<T>,
-    sender: Option<Sender<(usize, [u8; 1024])>>,
+    sender: Option<Sender<FirstMessage>>,
 }
 
 impl<T> FileReader<T>
 where
     T: Read + Send + 'static,
 {
-    pub fn new(reader: T, sender: Sender<(usize, [u8; 1024])>) -> Self {
+    pub fn new(reader: T, sender: Sender<FirstMessage>) -> Self {
         FileReader {
             file: Some(reader),
             sender: Some(sender),
