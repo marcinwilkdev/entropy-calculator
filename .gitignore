@@ -1,0 +1,7 @@
+/target
+*.bin
+*.jpeg
+*.mp4
+*.pdf
+*.txt
+.DS_Store
