@@ -1,6 +1,5 @@
 pub mod entropy_calculator;
 pub mod file_reader;
-pub mod gluer;
 pub mod symbols_counter;
 
 pub type FirstMessage = (usize, [u8; 1024]);
