@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
 
@@ -30,7 +31,7 @@ impl SymbolsCounter {
             let mut symbols_count = 0.0;
 
             let mut probabilities = [0.0; u8::MAX as usize + 1];
-            let mut conditional_probabilites = [0.0; u16::MAX as usize + 1];
+            let mut conditional_probabilites = HashMap::new();
 
             while let Ok((content_len, content)) = receiver.recv() {
                 symbols_count += content_len as f64;
@@ -38,11 +39,11 @@ impl SymbolsCounter {
                 let content = &content[..content_len];
 
                 for &symbol in content {
-                    let mut conditional_probabilites_index = symbol as usize;
-                    conditional_probabilites_index += (last_symbol as usize) << 8;
-
                     probabilities[symbol as usize] += 1.0;
-                    conditional_probabilites[conditional_probabilites_index] += 1.0;
+
+                    *conditional_probabilites
+                        .entry((symbol, last_symbol))
+                        .or_insert(0.0) += 1.0;
 
                     last_symbol = symbol;
                 }
@@ -52,11 +53,13 @@ impl SymbolsCounter {
                 *prob /= symbols_count;
             }
 
-            for cond_prob in &mut conditional_probabilites {
+            for (_, cond_prob) in &mut conditional_probabilites {
                 *cond_prob /= symbols_count;
             }
 
-            sender.send((probabilities, conditional_probabilites)).expect("Error sending message");
+            sender
+                .send((probabilities, conditional_probabilites))
+                .expect("Error sending message");
         });
     }
 }
