@@ -1,14 +1,14 @@
-use std::collections::HashMap;
+use crate::{ConditionalProbabilities, Probabilities};
 
 pub struct EntropyCalculator {
-    probabilities: [f64; u8::MAX as usize + 1],
-    conditional_probabilities: HashMap<(u8, u8), f64>,
+    probabilities: Probabilities,
+    conditional_probabilities: ConditionalProbabilities,
 }
 
 impl EntropyCalculator {
     pub fn new(
-        probabilities: [f64; u8::MAX as usize + 1],
-        conditional_probabilities: HashMap<(u8, u8), f64>,
+        probabilities: Probabilities,
+        conditional_probabilities: ConditionalProbabilities,
     ) -> EntropyCalculator {
         EntropyCalculator {
             probabilities,
