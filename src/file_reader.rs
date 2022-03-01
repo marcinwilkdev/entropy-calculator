@@ -1,23 +1,20 @@
-use std::fs::File;
 use std::io::Read;
-use std::path::Path;
 use std::sync::mpsc::Sender;
-use std::thread::{self, JoinHandle};
+use std::thread;
 
-pub struct FileReader {
-    file: Option<File>,
+pub struct FileReader<T> {
+    file: Option<T>,
     sender: Option<Sender<(usize, [u8; 1024])>>,
-    join_handle: Option<JoinHandle<()>>,
 }
 
-impl FileReader {
-    pub fn new(file_path: &Path, sender: Sender<(usize, [u8; 1024])>) -> FileReader {
-        let file = File::open(file_path).expect("File doesn'st exist.");
-
+impl<T> FileReader<T>
+where
+    T: Read + Send + 'static,
+{
+    pub fn new(reader: T, sender: Sender<(usize, [u8; 1024])>) -> Self {
         FileReader {
-            file: Some(file),
+            file: Some(reader),
             sender: Some(sender),
-            join_handle: None,
         }
     }
 
@@ -30,7 +27,7 @@ impl FileReader {
         let mut file = self.file.take().unwrap();
         let sender = self.sender.take().unwrap();
 
-        let join_handle = thread::spawn(move || loop {
+        thread::spawn(move || loop {
             let mut buffer = [0; 1024];
 
             let read_len = file.read(&mut buffer).expect("Error reading file");
@@ -39,22 +36,25 @@ impl FileReader {
                 break;
             }
 
-            sender.send((read_len, buffer)).expect("Couldn't send value");
+            sender
+                .send((read_len, buffer))
+                .expect("Couldn't send value");
         });
-
-        self.join_handle = Some(join_handle);
-    }
-
-    pub fn wait_for_read(&mut self) {
-        if self.join_handle.is_none() {
-            eprintln!("You have to call read_file first");
-            return;
-        }
-
-        let join_handle = self.join_handle.take().unwrap();
-
-        if let Err(_) = join_handle.join() {
-            eprintln!("Couldn't join thread");
-        }
     }
 }
+
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+
+//     use std::sync::mpsc;
+
+//     #[test]
+//     fn buffer_sends_correctly() {
+//         let (sender, receiver) = mpsc::channel::<(usize, [u8; 1024])>();
+
+//         let buffer = [0; 1024];
+
+//         let mut file_reader = FileReader::new(buffer, sender);
+//     }
+// }
