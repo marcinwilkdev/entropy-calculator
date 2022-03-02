@@ -1,19 +1,12 @@
 use std::fs::File;
-use std::path::PathBuf;
 
 use structopt::StructOpt;
 
 use lab1::entropy_calculator::EntropyCalculator;
 use lab1::file_reader::FileReader;
+use lab1::opt::Opt;
 use lab1::symbols_counter::SymbolsCounter;
 use lab1::{BytesChunk, ReadyProbabilities};
-
-#[derive(StructOpt, Debug)]
-#[structopt(name = "lab1")]
-struct Opt {
-    #[structopt(short, long, parse(from_os_str))]
-    file: PathBuf,
-}
 
 fn main() {
     let opt = Opt::from_args();
