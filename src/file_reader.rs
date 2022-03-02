@@ -3,45 +3,45 @@ use std::thread;
 
 use crossbeam_channel::Sender;
 
-use crate::FirstMessage;
+use crate::BytesChunk;
 
-pub struct FileReader<T> {
-    file: Option<T>,
-    sender: Option<Sender<FirstMessage>>,
+pub struct FileReader<R> {
+    file: Option<R>,
+    bytes_tx: Option<Sender<BytesChunk>>,
 }
 
-impl<T> FileReader<T>
+impl<R> FileReader<R>
 where
-    T: Read + Send + 'static,
+    R: Read + Send + 'static,
 {
-    pub fn new(reader: T, sender: Sender<FirstMessage>) -> Self {
+    pub fn new(reader: R, bytes_tx: Sender<BytesChunk>) -> Self {
         FileReader {
             file: Some(reader),
-            sender: Some(sender),
+            bytes_tx: Some(bytes_tx),
         }
     }
 
     pub fn read_file(&mut self) {
-        if self.file.is_none() || self.sender.is_none() {
-            eprintln!("Method already called");
+        if self.file.is_none() || self.bytes_tx.is_none() {
+            eprintln!("Method already called.");
             return;
         }
 
         let mut file = self.file.take().unwrap();
-        let sender = self.sender.take().unwrap();
+        let sender = self.bytes_tx.take().unwrap();
 
         thread::spawn(move || loop {
-            let mut buffer = [0; 1024];
+            let mut bytes_chunk = [0; 1024];
 
-            let read_len = file.read(&mut buffer).expect("Error reading file");
+            let chunk_len = file.read(&mut bytes_chunk).expect("Couldn't reading file.");
 
-            if read_len == 0 {
+            if chunk_len == 0 {
                 break;
             }
 
             sender
-                .send((read_len, buffer))
-                .expect("Couldn't send value");
+                .send((chunk_len, bytes_chunk))
+                .expect("Couldn't send bytes chunk.");
         });
     }
 }

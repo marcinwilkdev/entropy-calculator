@@ -1,42 +1,38 @@
 use crate::{ConditionalProbabilities, Probabilities};
 
 pub struct EntropyCalculator {
-    probabilities: Probabilities,
-    conditional_probabilities: ConditionalProbabilities,
+    probs: Probabilities,
+    cond_probs: ConditionalProbabilities,
 }
 
 impl EntropyCalculator {
-    pub fn new(
-        probabilities: Probabilities,
-        conditional_probabilities: ConditionalProbabilities,
-    ) -> EntropyCalculator {
-        EntropyCalculator {
-            probabilities,
-            conditional_probabilities,
-        }
+    pub fn new(probs: Probabilities, cond_probs: ConditionalProbabilities) -> EntropyCalculator {
+        EntropyCalculator { probs, cond_probs }
     }
 
     pub fn calculate_hx(&self) -> f64 {
         -1.0 * self
-            .probabilities
+            .probs
             .iter()
             .filter(|px| **px > 0.0)
             .fold(0.0, |sum, px| sum + px * px.log2())
     }
 
     pub fn calculate_hyx(&self) -> f64 {
-        self.probabilities
+        self.probs
             .iter()
             .enumerate()
             .filter(|(_, px)| **px > 0.0)
             .map(|(x1, px)| {
-                let px_ln = px.log2();
+                let px_log2 = px.log2();
 
-                self.conditional_probabilities
+                self.cond_probs
                     .iter()
                     .filter(|(_, pyx)| **pyx > 0.0)
                     .filter(|((_, x2), _)| *x2 as usize == x1)
-                    .fold(0.0, |sum, (_, pyx)| sum + pyx * (px_ln - pyx.log2()))
+                    .fold(0.0, |partial_sum, (_, pyx)| {
+                        partial_sum + pyx * (px_log2 - pyx.log2())
+                    })
             })
             .sum::<f64>()
     }
