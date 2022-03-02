@@ -1,6 +1,7 @@
 use std::io::Read;
-use std::sync::mpsc::Sender;
 use std::thread;
+
+use crossbeam_channel::Sender;
 
 use crate::FirstMessage;
 

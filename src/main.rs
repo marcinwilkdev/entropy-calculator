@@ -1,7 +1,6 @@
 use std::error::Error;
 use std::fs::File;
 use std::path::PathBuf;
-use std::sync::mpsc;
 
 use structopt::StructOpt;
 
@@ -22,19 +21,19 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let file = File::open(&opt.file).expect("File doesn't exist");
 
-    let (first_sender, first_receiver) = mpsc::channel::<FirstMessage>();
+    let (first_tx, first_rx) = crossbeam_channel::unbounded::<FirstMessage>();
 
-    let mut file_reader = FileReader::new(file, first_sender);
+    let mut file_reader = FileReader::new(file, first_tx);
 
     file_reader.read_file();
 
-    let (second_sender, second_receiver) = mpsc::channel::<SecondMessage>();
+    let (second_tx, second_rx) = crossbeam_channel::unbounded::<SecondMessage>();
 
-    let mut symbols_counter = SymbolsCounter::new(first_receiver, second_sender);
+    let mut symbols_counter = SymbolsCounter::new(first_rx, second_tx);
 
     symbols_counter.count_symbols();
 
-    let (probabilities, conditional_probabilities) = second_receiver.recv()?;
+    let (probabilities, conditional_probabilities) = second_rx.recv()?;
 
     let entropy_calculator = EntropyCalculator::new(probabilities, conditional_probabilities);
 

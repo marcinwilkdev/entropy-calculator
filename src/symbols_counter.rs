@@ -1,6 +1,7 @@
 use std::collections::HashMap;
-use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
+
+use crossbeam_channel::{Sender, Receiver};
 
 use crate::{FirstMessage, SecondMessage};
 
