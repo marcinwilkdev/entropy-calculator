@@ -6,40 +6,32 @@ use crossbeam_channel::Sender;
 use crate::BytesChunk;
 
 pub struct FileReader<R> {
-    file: Option<R>,
-    bytes_tx: Option<Sender<BytesChunk>>,
+    file: R,
+    bytes_tx: Sender<BytesChunk>,
 }
 
 impl<R> FileReader<R>
 where
     R: Read + Send + 'static,
 {
-    pub fn new(reader: R, bytes_tx: Sender<BytesChunk>) -> Self {
+    pub fn new(file: R, bytes_tx: Sender<BytesChunk>) -> Self {
         FileReader {
-            file: Some(reader),
-            bytes_tx: Some(bytes_tx),
+            file,
+            bytes_tx,
         }
     }
 
-    pub fn read_file(&mut self) {
-        if self.file.is_none() || self.bytes_tx.is_none() {
-            eprintln!("Method already called.");
-            return;
-        }
-
-        let mut file = self.file.take().unwrap();
-        let sender = self.bytes_tx.take().unwrap();
-
+    pub fn read_file(mut self) {
         thread::spawn(move || loop {
             let mut bytes_chunk = [0; 1024];
 
-            let chunk_len = file.read(&mut bytes_chunk).expect("Couldn't reading file.");
+            let chunk_len = self.file.read(&mut bytes_chunk).expect("Couldn't reading file.");
 
             if chunk_len == 0 {
                 break;
             }
 
-            sender
+            self.bytes_tx
                 .send((chunk_len, bytes_chunk))
                 .expect("Couldn't send bytes chunk.");
         });

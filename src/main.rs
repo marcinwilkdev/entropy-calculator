@@ -22,13 +22,13 @@ fn main() {
 
     let (bytes_tx, bytes_rx) = crossbeam_channel::unbounded::<BytesChunk>();
 
-    let mut file_reader = FileReader::new(file, bytes_tx);
+    let file_reader = FileReader::new(file, bytes_tx);
 
     file_reader.read_file();
 
     let (probs_tx, probs_rx) = crossbeam_channel::unbounded::<ReadyProbabilities>();
 
-    let mut symbols_counter = SymbolsCounter::new(bytes_rx, probs_tx);
+    let symbols_counter = SymbolsCounter::new(bytes_rx, probs_tx);
 
     symbols_counter.count_symbols();
 

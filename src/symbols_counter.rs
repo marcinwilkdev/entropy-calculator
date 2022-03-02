@@ -6,8 +6,8 @@ use crossbeam_channel::{Receiver, Sender};
 use crate::{BytesChunk, ReadyProbabilities};
 
 pub struct SymbolsCounter {
-    bytes_rx: Option<Receiver<BytesChunk>>,
-    probs_tx: Option<Sender<ReadyProbabilities>>,
+    bytes_rx: Receiver<BytesChunk>,
+    probs_tx: Sender<ReadyProbabilities>,
 }
 
 impl SymbolsCounter {
@@ -16,21 +16,12 @@ impl SymbolsCounter {
         probs_tx: Sender<ReadyProbabilities>,
     ) -> SymbolsCounter {
         SymbolsCounter {
-            bytes_rx: Some(bytes_rx),
-            probs_tx: Some(probs_tx),
+            bytes_rx,
+            probs_tx,
         }
     }
 
-    // change to taking self instead of reference
-    pub fn count_symbols(&mut self) {
-        if self.bytes_rx.is_none() || self.probs_tx.is_none() {
-            eprintln!("Method already called.");
-            return;
-        }
-
-        let bytes_rx = self.bytes_rx.take().unwrap();
-        let probs_tx = self.probs_tx.take().unwrap();
-
+    pub fn count_symbols(self) {
         thread::spawn(move || {
             let mut last_symbol = 0;
             let mut symbols_count = 0.0;
@@ -38,7 +29,7 @@ impl SymbolsCounter {
             let mut probs = [0.0; u8::MAX as usize + 1];
             let mut cond_probs = HashMap::new();
 
-            while let Ok((chunk_len, bytes_chunk)) = bytes_rx.recv() {
+            while let Ok((chunk_len, bytes_chunk)) = self.bytes_rx.recv() {
                 symbols_count += chunk_len as f64;
 
                 let bytes_chunk = &bytes_chunk[..chunk_len];
@@ -64,7 +55,7 @@ impl SymbolsCounter {
                 *cond_prob /= symbols_count;
             }
 
-            probs_tx
+            self.probs_tx
                 .send((probs, cond_probs))
                 .expect("Couldn't send ready probabilites.");
         });
