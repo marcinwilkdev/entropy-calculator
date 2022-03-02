@@ -1,6 +1,7 @@
 pub mod entropy_calculator;
 pub mod file_reader;
 pub mod symbols_counter;
+pub mod probabilities_calculator;
 
 pub type Probabilities = [f64; u8::MAX as usize + 1];
 pub type ConditionalProbabilities = std::collections::HashMap<(u8, u8), f64>;
