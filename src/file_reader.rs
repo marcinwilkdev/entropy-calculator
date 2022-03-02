@@ -37,19 +37,3 @@ where
         });
     }
 }
-
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-
-//     use std::sync::mpsc;
-
-//     #[test]
-//     fn buffer_sends_correctly() {
-//         let (sender, receiver) = mpsc::channel::<(usize, [u8; 1024])>();
-
-//         let buffer = [0; 1024];
-
-//         let mut file_reader = FileReader::new(buffer, sender);
-//     }
-// }

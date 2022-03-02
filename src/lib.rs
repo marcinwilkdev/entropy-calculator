@@ -16,7 +16,7 @@ pub mod opt {
     use structopt::StructOpt;
 
     #[derive(StructOpt, Debug)]
-    #[structopt(name = "lab1")]
+    #[structopt(name = "entropy_calculator")]
     pub struct Opt {
         #[structopt(short, long, parse(from_os_str))]
         pub file: PathBuf,

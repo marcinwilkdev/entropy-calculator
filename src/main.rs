@@ -2,11 +2,11 @@ use std::fs::File;
 
 use structopt::StructOpt;
 
-use lab1::entropy_calculator::EntropyCalculator;
-use lab1::file_reader::FileReader;
-use lab1::opt::Opt;
-use lab1::symbols_counter::SymbolsCounter;
-use lab1::{BytesChunk, ReadyProbabilities};
+use entropy_calculator::entropy_calculator::EntropyCalculator;
+use entropy_calculator::file_reader::FileReader;
+use entropy_calculator::opt::Opt;
+use entropy_calculator::symbols_counter::SymbolsCounter;
+use entropy_calculator::{BytesChunk, ReadyProbabilities};
 
 fn main() {
     let opt = Opt::from_args();

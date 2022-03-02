@@ -7,7 +7,7 @@ use std::path::PathBuf;
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
-#[structopt(name = "lab1")]
+#[structopt(name = "entropy_calculator")]
 struct Opt {
     #[structopt(short, long, parse(from_os_str))]
     file: PathBuf,

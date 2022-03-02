@@ -70,6 +70,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "entropy_calculator"
+version = "0.1.0"
+dependencies = [
+ "crossbeam-channel",
+ "structopt",
+]
+
+[[package]]
 name = "heck"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -85,14 +93,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "62b467343b94ba476dcb2500d242dadbb39557df889310ac77c5d99100aaac33"
 dependencies = [
  "libc",
-]
-
-[[package]]
-name = "lab1"
-version = "0.1.0"
-dependencies = [
- "crossbeam-channel",
- "structopt",
 ]
 
 [[package]]
