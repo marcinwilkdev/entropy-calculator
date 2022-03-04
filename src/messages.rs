@@ -1,4 +1,4 @@
-use crate::{ConditionalProbabilities, Probabilities, CHUNK_SIZE};
+use crate::{SymbolsPairs, Symbols, CHUNK_SIZE};
 
 pub struct BytesChunk {
     pub size: usize,
@@ -6,8 +6,8 @@ pub struct BytesChunk {
 }
 
 pub struct CountedSymbols {
-    pub symbols: Probabilities,
-    pub cond_symbols: ConditionalProbabilities,
+    pub symbols: Symbols,
+    pub cond_symbols: SymbolsPairs,
     pub count: f64,
 }
 

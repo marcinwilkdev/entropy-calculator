@@ -30,13 +30,13 @@ impl CounterPool {
         let mut counted_symbols = self
             .symbols_rx
             .recv()
-            .expect("Couldn't fetch ready probabilities.");
+            .expect("Couldn't fetch counted symbols.");
 
         for _ in 0..receiver_threads - 1 {
             let next_counted_symbols = self
                 .symbols_rx
                 .recv()
-                .expect("Couldn't fetch ready probabilities.");
+                .expect("Couldn't fetch counted symbols.");
 
             counted_symbols.merge(next_counted_symbols);
         }

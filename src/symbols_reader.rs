@@ -6,24 +6,24 @@ use crossbeam_channel::Sender;
 use crate::messages::BytesChunk;
 use crate::CHUNK_SIZE;
 
-pub struct FileReader<R> {
-    file: R,
+pub struct SymbolsReader<R> {
+    source: R,
     bytes_tx: Sender<BytesChunk>,
 }
 
-impl<R> FileReader<R>
+impl<R> SymbolsReader<R>
 where
     R: Read + Send + 'static,
 {
-    pub fn new(file: R, bytes_tx: Sender<BytesChunk>) -> Self {
-        FileReader { file, bytes_tx }
+    pub fn new(source: R, bytes_tx: Sender<BytesChunk>) -> Self {
+        SymbolsReader { source, bytes_tx }
     }
 
-    pub fn read_file(mut self) {
+    pub fn read_symbols(mut self) {
         thread::spawn(move || loop {
             let mut chunk = [0; CHUNK_SIZE];
 
-            let size = self.file.read(&mut chunk).expect("Couldn't read file.");
+            let size = self.source.read(&mut chunk).expect("Couldn't read file.");
 
             if size == 0 {
                 break;

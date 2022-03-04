@@ -3,7 +3,7 @@ use std::fs::File;
 use structopt::StructOpt;
 
 use entropy_calculator::entropy_calculator::EntropyCalculator;
-use entropy_calculator::file_reader::FileReader;
+use entropy_calculator::symbols_reader::SymbolsReader;
 use entropy_calculator::opt::Opt;
 use entropy_calculator::messages::BytesChunk;
 use entropy_calculator::counter_pool::CounterPool;
@@ -17,9 +17,7 @@ fn main() {
 
     let (bytes_tx, bytes_rx) = crossbeam_channel::bounded::<BytesChunk>(1);
 
-    let file_reader = FileReader::new(file, bytes_tx);
-
-    file_reader.read_file();
+    SymbolsReader::new(file, bytes_tx).read_symbols();
 
     let mut counter_pool = CounterPool::new(bytes_rx);
 

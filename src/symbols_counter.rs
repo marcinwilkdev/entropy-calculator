@@ -1,10 +1,11 @@
 use crate::messages::{BytesChunk, CountedSymbols};
+use crate::{Symbols, SymbolsPairs};
 
 pub struct SymbolsCounter {
     last_symbol: u8,
     symbols_count: f64,
-    probs: [f64; 256],
-    cond_probs: [[f64; 256]; 256],
+    symbols: Symbols,
+    symbols_pairs: SymbolsPairs,
 }
 
 impl SymbolsCounter {
@@ -12,8 +13,8 @@ impl SymbolsCounter {
         SymbolsCounter {
             last_symbol: 0,
             symbols_count: 0.0,
-            probs: [0.0; 256],
-            cond_probs: [[0.0; 256]; 256],
+            symbols: [0.0; 256],
+            symbols_pairs: [[0.0; 256]; 256],
         }
     }
 
@@ -30,17 +31,17 @@ impl SymbolsCounter {
     }
 
     fn insert_symbol(&mut self, symbol: u8) {
-        self.probs[symbol as usize] += 1.0;
+        self.symbols[symbol as usize] += 1.0;
 
-        self.cond_probs[self.last_symbol as usize][symbol as usize] += 1.0;
+        self.symbols_pairs[self.last_symbol as usize][symbol as usize] += 1.0;
 
         self.last_symbol = symbol;
     }
 
-    pub fn get_probs(self) -> CountedSymbols {
+    pub fn get_counted_symbols(self) -> CountedSymbols {
         CountedSymbols {
-            symbols: self.probs,
-            cond_symbols: self.cond_probs,
+            symbols: self.symbols,
+            cond_symbols: self.symbols_pairs,
             count: self.symbols_count,
         }
     }

@@ -7,15 +7,15 @@ use crate::messages::{BytesChunk, CountedSymbols};
 
 pub struct SymbolsReceiver {
     bytes_rx: Receiver<BytesChunk>,
-    probs_tx: Sender<CountedSymbols>,
+    symbols_tx: Sender<CountedSymbols>,
 }
 
 impl SymbolsReceiver {
     pub fn new(
         bytes_rx: Receiver<BytesChunk>,
-        probs_tx: Sender<CountedSymbols>,
+        symbols_tx: Sender<CountedSymbols>,
     ) -> SymbolsReceiver {
-        SymbolsReceiver { bytes_rx, probs_tx }
+        SymbolsReceiver { bytes_rx, symbols_tx }
     }
 
     pub fn count_symbols(self) {
@@ -26,11 +26,11 @@ impl SymbolsReceiver {
                 .iter()
                 .for_each(|bytes_chunk| symbols_counter.insert_byte_chunk(bytes_chunk));
 
-            let counted_symbols = symbols_counter.get_probs();
+            let counted_symbols = symbols_counter.get_counted_symbols();
 
-            self.probs_tx
+            self.symbols_tx
                 .send(counted_symbols)
-                .expect("Couldn't send ready probabilites.");
+                .expect("Couldn't send counted symbols.");
         });
     }
 }
