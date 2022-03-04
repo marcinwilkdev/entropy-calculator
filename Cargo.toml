@@ -6,3 +6,10 @@ edition = "2021"
 [dependencies]
 structopt = "0.3"
 crossbeam-channel = "0.5"
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "my_benchmark"
+harness = false

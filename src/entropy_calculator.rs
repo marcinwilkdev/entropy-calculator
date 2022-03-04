@@ -1,39 +1,58 @@
-use crate::{ConditionalProbabilities, Probabilities};
+use crate::messages::CountedSymbols;
 
 pub struct EntropyCalculator {
-    probs: Probabilities,
-    cond_probs: ConditionalProbabilities,
+    counted_symbols: CountedSymbols,
+    count_x_log_2_cache: [f64; 256],
 }
 
 impl EntropyCalculator {
-    pub fn new(probs: Probabilities, cond_probs: ConditionalProbabilities) -> EntropyCalculator {
-        EntropyCalculator { probs, cond_probs }
+    pub fn new(counted_symbols: CountedSymbols) -> EntropyCalculator {
+        EntropyCalculator {
+            counted_symbols,
+            count_x_log_2_cache: [0.0; 256],
+        }
     }
 
-    pub fn calculate_hx(&self) -> f64 {
-        -1.0 * self
-            .probs
+    pub fn calculate_hx(&mut self) -> f64 {
+        let CountedSymbols { symbols, count, .. } = self.counted_symbols;
+
+        let log_2_count_all = count.log2();
+
+        symbols
             .iter()
-            .filter(|px| **px > 0.0)
-            .fold(0.0, |sum, px| sum + px * px.log2())
+            .enumerate()
+            .filter(|(_, count_x)| **count_x > 0.0)
+            .fold(0.0, |sum, (x, count_x)| {
+                let count_x_log_2 = count_x.log2();
+                self.count_x_log_2_cache[x as usize] = count_x_log_2; // caching
+
+                sum + count_x * (log_2_count_all - count_x_log_2)
+            })
+            / count
     }
 
     pub fn calculate_hyx(&self) -> f64 {
-        self.probs
+        let CountedSymbols {
+            symbols,
+            cond_symbols,
+            count,
+        } = self.counted_symbols;
+
+        symbols
             .iter()
             .enumerate()
-            .filter(|(_, px)| **px > 0.0)
-            .map(|(x1, px)| {
-                let px_log2 = px.log2();
+            .filter(|(_, count_x)| **count_x > 0.0)
+            .map(|(x1, _)| {
+                let count_x_log_2 = self.count_x_log_2_cache[x1]; // cache
 
-                self.cond_probs
+                cond_symbols[x1]
                     .iter()
-                    .filter(|(_, pyx)| **pyx > 0.0)
-                    .filter(|((_, x2), _)| *x2 as usize == x1)
-                    .fold(0.0, |partial_sum, (_, pyx)| {
-                        partial_sum + pyx * (px_log2 - pyx.log2())
+                    .filter(|count_yx| **count_yx > 0.0)
+                    .fold(0.0, |partial_sum, count_yx| {
+                        partial_sum + count_yx * (count_x_log_2 - count_yx.log2())
                     })
             })
             .sum::<f64>()
+            / count
     }
 }

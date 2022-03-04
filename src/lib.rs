@@ -1,14 +1,14 @@
+pub mod counter_pool;
 pub mod entropy_calculator;
 pub mod file_reader;
-pub mod probabilities_calculator;
 pub mod symbols_counter;
+pub mod symbols_receiver;
+pub mod messages;
 
 pub const CHUNK_SIZE: usize = 1024;
 
 pub type Probabilities = [f64; u8::MAX as usize + 1];
-pub type ConditionalProbabilities = std::collections::HashMap<(u8, u8), f64>;
-pub type BytesChunk = (usize, [u8; CHUNK_SIZE]);
-pub type ReadyProbabilities = (Probabilities, ConditionalProbabilities);
+pub type ConditionalProbabilities = [[f64; 256]; 256];
 
 pub mod opt {
     use std::path::PathBuf;

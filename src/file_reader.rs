@@ -3,7 +3,8 @@ use std::thread;
 
 use crossbeam_channel::Sender;
 
-use crate::{BytesChunk, CHUNK_SIZE};
+use crate::messages::BytesChunk;
+use crate::CHUNK_SIZE;
 
 pub struct FileReader<R> {
     file: R,
@@ -15,24 +16,21 @@ where
     R: Read + Send + 'static,
 {
     pub fn new(file: R, bytes_tx: Sender<BytesChunk>) -> Self {
-        FileReader {
-            file,
-            bytes_tx,
-        }
+        FileReader { file, bytes_tx }
     }
 
     pub fn read_file(mut self) {
         thread::spawn(move || loop {
-            let mut bytes_chunk = [0; CHUNK_SIZE];
+            let mut chunk = [0; CHUNK_SIZE];
 
-            let chunk_len = self.file.read(&mut bytes_chunk).expect("Couldn't reading file.");
+            let size = self.file.read(&mut chunk).expect("Couldn't read file.");
 
-            if chunk_len == 0 {
+            if size == 0 {
                 break;
             }
 
             self.bytes_tx
-                .send((chunk_len, bytes_chunk))
+                .send(BytesChunk { size, chunk })
                 .expect("Couldn't send bytes chunk.");
         });
     }

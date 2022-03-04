@@ -5,31 +5,31 @@ use structopt::StructOpt;
 use entropy_calculator::entropy_calculator::EntropyCalculator;
 use entropy_calculator::file_reader::FileReader;
 use entropy_calculator::opt::Opt;
-use entropy_calculator::symbols_counter::SymbolsCounter;
-use entropy_calculator::{BytesChunk, ReadyProbabilities};
+use entropy_calculator::messages::{BytesChunk, CountedSymbols};
+use entropy_calculator::counter_pool::CounterPool;
 
 fn main() {
+    let runtime = std::time::Instant::now();
+
     let opt = Opt::from_args();
 
     let file = File::open(&opt.file).expect("File doesn't exist.");
 
-    let (bytes_tx, bytes_rx) = crossbeam_channel::unbounded::<BytesChunk>();
+    let (bytes_tx, bytes_rx) = crossbeam_channel::bounded::<BytesChunk>(1);
 
     let file_reader = FileReader::new(file, bytes_tx);
 
     file_reader.read_file();
 
-    let (probs_tx, probs_rx) = crossbeam_channel::unbounded::<ReadyProbabilities>();
+    let mut counter_pool = CounterPool::new(bytes_rx);
 
-    let symbols_counter = SymbolsCounter::new(bytes_rx, probs_tx);
+    let CountedSymbols {
+        symbols,
+        cond_symbols,
+        count,
+    } = counter_pool.count_symbols(2);
 
-    symbols_counter.count_symbols();
-
-    let (probs, cond_probs) = probs_rx
-        .recv()
-        .expect("Couldn't fetch ready probabilities.");
-
-    let entropy_calculator = EntropyCalculator::new(probs, cond_probs);
+    let mut entropy_calculator = EntropyCalculator::new(symbols, cond_symbols, count);
 
     let hx = entropy_calculator.calculate_hx();
     let hyx = entropy_calculator.calculate_hyx();
@@ -37,4 +37,6 @@ fn main() {
     println!("hx {}", hx);
     println!("hyx {}", hyx);
     println!("hx - hyx {}", hx - hyx);
+
+    println!("\nprogram runtime: {:?}", runtime.elapsed());
 }
