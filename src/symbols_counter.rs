@@ -45,3 +45,9 @@ impl SymbolsCounter {
         }
     }
 }
+
+impl Default for SymbolsCounter {
+    fn default() -> Self {
+        Self::new()
+    }
+}

@@ -20,5 +20,7 @@ pub mod opt {
     pub struct Opt {
         #[structopt(short, long, parse(from_os_str))]
         pub file: PathBuf,
+        #[structopt(short, long, default_value = "1")]
+        pub threads: usize,
     }
 }

@@ -1,4 +1,3 @@
-
 use crate::{ConditionalProbabilities, Probabilities, CHUNK_SIZE};
 
 pub struct BytesChunk {
@@ -17,9 +16,7 @@ impl CountedSymbols {
         self.symbols
             .iter_mut()
             .enumerate()
-            .for_each(|(symbol, symbol_count)| {
-                *symbol_count = *symbol_count + other.symbols[symbol]
-            });
+            .for_each(|(symbol, symbol_count)| *symbol_count += other.symbols[symbol]);
 
         self.cond_symbols
             .iter_mut()
@@ -27,8 +24,7 @@ impl CountedSymbols {
             .for_each(|(symbol, symbol_count)| {
                 symbol_count.iter_mut().enumerate().for_each(
                     |(after_symbol, after_sumbol_count)| {
-                        *after_sumbol_count =
-                            *after_sumbol_count + other.cond_symbols[symbol][after_symbol]
+                        *after_sumbol_count += other.cond_symbols[symbol][after_symbol]
                     },
                 )
             });
