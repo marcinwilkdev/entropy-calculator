@@ -20,18 +20,24 @@ where
     }
 
     pub fn read_symbols(mut self) {
-        thread::spawn(move || loop {
-            let mut chunk = [0; CHUNK_SIZE];
+        thread::spawn(move || {
+            let mut last_symbol = 0;
 
-            let size = self.source.read(&mut chunk).expect("Couldn't read file.");
+            loop {
+                let mut chunk = [0; CHUNK_SIZE];
 
-            if size == 0 {
-                break;
+                let size = self.source.read(&mut chunk).expect("Couldn't read file.");
+
+                if size == 0 {
+                    break;
+                }
+
+                self.bytes_tx
+                    .send(BytesChunk { last_symbol, size, chunk })
+                    .expect("Couldn't send bytes chunk.");
+
+                last_symbol = chunk[CHUNK_SIZE - 1];
             }
-
-            self.bytes_tx
-                .send(BytesChunk { size, chunk })
-                .expect("Couldn't send bytes chunk.");
         });
     }
 }

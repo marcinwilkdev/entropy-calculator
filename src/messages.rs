@@ -1,6 +1,7 @@
-use crate::{SymbolsPairs, Symbols, CHUNK_SIZE};
+use crate::{Symbols, SymbolsPairs, CHUNK_SIZE};
 
 pub struct BytesChunk {
+    pub last_symbol: u8,
     pub size: usize,
     pub chunk: [u8; CHUNK_SIZE],
 }
@@ -18,6 +19,7 @@ impl CountedSymbols {
             .enumerate()
             .for_each(|(symbol, symbol_count)| *symbol_count += other.symbols[symbol]);
 
+        // not working, fix needed
         self.cond_symbols
             .iter_mut()
             .enumerate()

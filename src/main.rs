@@ -2,11 +2,11 @@ use std::fs::File;
 
 use structopt::StructOpt;
 
-use entropy_calculator::entropy_calculator::EntropyCalculator;
-use entropy_calculator::symbols_reader::SymbolsReader;
-use entropy_calculator::opt::Opt;
-use entropy_calculator::messages::BytesChunk;
 use entropy_calculator::counter_pool::CounterPool;
+use entropy_calculator::entropy_calculator::EntropyCalculator;
+use entropy_calculator::messages::BytesChunk;
+use entropy_calculator::opt::Opt;
+use entropy_calculator::symbols_reader::SymbolsReader;
 
 fn main() {
     let runtime = std::time::Instant::now();

@@ -1,7 +1,7 @@
 use crossbeam_channel::{Receiver, Sender};
 
-use crate::symbols_receiver::SymbolsReceiver;
 use crate::messages::{BytesChunk, CountedSymbols};
+use crate::symbols_receiver::SymbolsReceiver;
 
 pub struct CounterPool {
     bytes_rx: Receiver<BytesChunk>,

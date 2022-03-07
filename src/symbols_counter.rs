@@ -19,7 +19,9 @@ impl SymbolsCounter {
     }
 
     pub fn insert_byte_chunk(&mut self, bytes_chunk: BytesChunk) {
-        let BytesChunk { size, chunk } = bytes_chunk;
+        let BytesChunk { last_symbol, size, chunk } = bytes_chunk;
+
+        self.last_symbol = last_symbol;
 
         let bytes_chunk = &chunk[..size];
 
