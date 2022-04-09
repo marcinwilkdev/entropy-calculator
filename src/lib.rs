@@ -24,3 +24,28 @@ pub mod opt {
         pub threads: usize,
     }
 }
+
+use entropy_calculator::EntropyCalculator;
+use counter_pool::CounterPool;
+use std::fs::File;
+use std::path::Path;
+use symbols_reader::SymbolsReader;
+use messages::BytesChunk;
+
+pub fn show_file_entropy(filename: &Path) {
+    let file = File::open(filename).expect("File doesn't exist.");
+
+    let (bytes_tx, bytes_rx) = crossbeam_channel::bounded::<BytesChunk>(1);
+
+    SymbolsReader::new(file, bytes_tx).read_symbols();
+
+    let mut counter_pool = CounterPool::new(bytes_rx);
+
+    let counted_symbols = counter_pool.count_symbols(1);
+
+    let mut entropy_calculator = EntropyCalculator::new(counted_symbols);
+
+    let hx = entropy_calculator.calculate_hx();
+
+    println!("Source entropy: {}", hx);
+}
