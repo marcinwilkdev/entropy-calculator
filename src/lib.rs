@@ -32,7 +32,7 @@ use std::path::Path;
 use symbols_reader::SymbolsReader;
 use messages::BytesChunk;
 
-pub fn show_file_entropy(filename: &Path) {
+pub fn get_file_entropy(filename: &Path) -> f64 {
     let file = File::open(filename).expect("File doesn't exist.");
 
     let (bytes_tx, bytes_rx) = crossbeam_channel::bounded::<BytesChunk>(1);
@@ -45,7 +45,5 @@ pub fn show_file_entropy(filename: &Path) {
 
     let mut entropy_calculator = EntropyCalculator::new(counted_symbols);
 
-    let hx = entropy_calculator.calculate_hx();
-
-    println!("Source entropy: {}", hx);
+    entropy_calculator.calculate_hx()
 }
